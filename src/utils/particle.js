@@ -44,18 +44,20 @@ export function createParticleShape(count) {
 
 export function createParticlePalette(count, layers = null) {
   const colors = new Float32Array(count * 3)
-  const cloud = new Color('#f1eee7')
-  const mist = new Color('#d9d5cc')
-  const celadon = new Color('#b9c8c5')
+  const cloud = new Color('#e8e4dc')
+  const mist = new Color('#d4cfc8')
+  const accent = new Color('#c8a96e')
+  const cool = new Color('#9ea8b5')
 
   for (let index = 0; index < count; index += 1) {
     const mixA = Math.random()
-    const mixB = Math.random() * 0.18
-    const contourLift = layers ? layers[index] * 0.12 : 0
+    const mixB = Math.random() * 0.14
+    const contourLift = layers ? layers[index] * 0.14 : 0
     const tone = cloud
       .clone()
-      .lerp(mist, mixA * 0.68 + contourLift)
-      .lerp(celadon, mixB + contourLift * 0.5)
+      .lerp(mist, mixA * 0.72 + contourLift)
+      .lerp(accent, mixB + contourLift * 0.3)
+      .lerp(cool, mixB * 0.22)
     const i3 = index * 3
 
     colors[i3] = tone.r

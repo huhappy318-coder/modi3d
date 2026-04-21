@@ -112,6 +112,7 @@ export function sampleSvgPointCloud(svgText, count, options = {}) {
     return {
       positions: new Float32Array(count * 3),
       layers: new Float32Array(count),
+      seeds: new Float32Array(count),
     }
   }
 
@@ -136,6 +137,33 @@ export function sampleSvgPointCloud(svgText, count, options = {}) {
     positions[i3 + 2] = depthBias
     layers[index] = point.layer
     seeds[index] = Math.random()
+  }
+
+  return {
+    positions,
+    layers,
+    seeds,
+  }
+}
+
+export function expandPointCloud(cloud, targetCount) {
+  const sourceCount = Math.max(1, cloud.positions.length / 3)
+  const positions = new Float32Array(targetCount * 3)
+  const layers = new Float32Array(targetCount)
+  const seeds = new Float32Array(targetCount)
+
+  for (let index = 0; index < targetCount; index += 1) {
+    const sourceIndex = (index * 37) % sourceCount
+    const source3 = sourceIndex * 3
+    const target3 = index * 3
+    const jitter = (Math.random() - 0.5) * 0.018
+    const layer = cloud.layers[sourceIndex] ?? 0
+
+    positions[target3] = cloud.positions[source3] + jitter
+    positions[target3 + 1] = cloud.positions[source3 + 1] + jitter * 0.8
+    positions[target3 + 2] = cloud.positions[source3 + 2] + jitter * 0.35
+    layers[index] = layer
+    seeds[index] = cloud.seeds[sourceIndex] ?? Math.random()
   }
 
   return {

@@ -8,7 +8,7 @@ import useInteractionPoint from '../hooks/useInteractionPoint'
 
 function PaperBackdrop({ materialRef }) {
   return (
-    <mesh position={[0, 0, -7.5]} scale={[24, 14, 1]}>
+    <mesh position={[0, 0, -11]} scale={[28, 18, 1]}>
       <planeGeometry args={[1, 1, 1, 1]} />
       <shaderMaterial
         ref={materialRef}
@@ -48,9 +48,9 @@ function PaperBackdrop({ materialRef }) {
             float grain = noise(uv * 220.0 + uTime * 0.02);
             float soft = noise(uv * 6.0 + vec2(uTime * 0.01, -uTime * 0.008));
             float vignette = smoothstep(1.02, 0.28, distance(uv, vec2(0.5)));
-            vec3 paper = vec3(0.078, 0.085, 0.08);
-            vec3 warm = vec3(0.098, 0.098, 0.094);
-            vec3 inkShadow = vec3(0.045, 0.05, 0.048);
+            vec3 paper = vec3(0.072, 0.078, 0.086);
+            vec3 warm = vec3(0.084, 0.09, 0.096);
+            vec3 inkShadow = vec3(0.036, 0.041, 0.048);
             vec3 color = mix(paper, warm, uv.y * 0.55 + soft * 0.08);
             color = mix(color, inkShadow, smoothstep(0.74, 1.0, 1.0 - vignette));
             color += (grain - 0.5) * 0.025;
@@ -99,16 +99,16 @@ function SceneContent() {
 
   return (
     <>
-      <color attach="background" args={['#0e100f']} />
-      <fog attach="fog" args={['#0e100f', 5.8, 14]} />
-      <ambientLight intensity={0.44} color="#d7d3ca" />
-      <directionalLight position={[2, 3, 4]} intensity={0.2} color="#cad5d0" />
+      <color attach="background" args={['#0d0f14']} />
+      <fog attach="fog" args={['#0d0f14', 8, 25]} />
+      <ambientLight intensity={0.4} color="#d7d3ca" />
+      <directionalLight position={[2, 3, 4]} intensity={0.18} color="#cad5d0" />
       <PaperBackdrop materialRef={paperMaterialRef} />
       <ParticleField interactionRef={smoothedPoint} interactionState={interaction} />
       <EffectComposer multisampling={0}>
-        <Bloom intensity={0.14} luminanceThreshold={0.78} luminanceSmoothing={0.9} mipmapBlur />
-        <Noise opacity={0.014} />
-        <Vignette offset={0.2} darkness={0.94} eskil={false} />
+        <Bloom intensity={0.1} luminanceThreshold={0.8} luminanceSmoothing={0.92} mipmapBlur />
+        <Noise opacity={0.01} />
+        <Vignette offset={0.22} darkness={0.95} eskil={false} />
       </EffectComposer>
       <Preload all />
     </>
@@ -117,9 +117,10 @@ function SceneContent() {
 
 function ParticleScene() {
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 h-screen w-screen">
       <Canvas
-        camera={{ position: [0, 0, 5.8], fov: 48 }}
+        className="block h-full w-full"
+        camera={{ position: [0, 0, 7.2], fov: 46 }}
         dpr={[1, 1.8]}
         gl={{ antialias: true, alpha: true }}
       >

@@ -6,49 +6,67 @@ import pineSvg from '../assets/shapes/pine.svg?raw'
 import strokeSvg from '../assets/shapes/stroke.svg?raw'
 import cloudSvg from '../assets/shapes/cloud.svg?raw'
 import { smoothStep } from '../utils/math'
-import { sampleSvgPointCloud } from '../utils/shapeSampling'
+import { expandPointCloud, sampleSvgPointCloud } from '../utils/shapeSampling'
 
 const SHAPE_SOURCES = [
   {
     id: 'mountain',
     name: '山岚',
-    description: '像远山的呼吸，作为当前默认轮廓。',
+    description: '远山呼吸般的轮廓。',
     svg: mountainSvg,
+    sampleCount: 1600,
+    targetSize: 2.25,
+    contourRatio: 0.38,
   },
   {
     id: 'roof',
     name: '屋檐',
-    description: '更安静的建筑边线，适合作为古画的留白骨架。',
+    description: '更安静的建筑边线。',
     svg: roofSvg,
+    sampleCount: 1100,
+    targetSize: 2.18,
+    contourRatio: 0.42,
   },
   {
     id: 'pine',
     name: '古松',
-    description: '枝干与层次轻轻交叠，形成更有气韵的轮廓。',
+    description: '枝干与层次缓缓交叠。',
     svg: pineSvg,
+    sampleCount: 1400,
+    targetSize: 2.28,
+    contourRatio: 0.36,
   },
   {
     id: 'stroke',
     name: '墨痕',
-    description: '一笔横向的飞白与拖尾，适合散开与回收。',
+    description: '一笔飞白与拖尾。',
     svg: strokeSvg,
+    sampleCount: 800,
+    targetSize: 2.3,
+    contourRatio: 0.52,
   },
   {
     id: 'cloud',
     name: '云气',
-    description: '一团更松的雾形，作为过渡时的呼吸层。',
+    description: '更松的雾形过渡层。',
     svg: cloudSvg,
+    sampleCount: 1000,
+    targetSize: 2.22,
+    contourRatio: 0.3,
   },
   {
     id: 'seal',
     name: '方印',
-    description: '极简印章轮廓，用作收束与落点。',
+    description: '极简印章式收束。',
     svg: sealSvg,
+    sampleCount: 600,
+    targetSize: 2.0,
+    contourRatio: 0.44,
   },
 ]
 
-const SHAPE_CYCLE_INTERVAL = 18000
-const SHAPE_MORPH_DURATION = 5200
+const DISPLAY_DURATION = 8000
+const TRANSITION_DURATION = 2800
 
 function blendArrays(fromArray, toArray, progress) {
   const blended = new Float32Array(fromArray.length)
@@ -63,11 +81,11 @@ function blendArrays(fromArray, toArray, progress) {
 function useShapeSource(particleCount) {
   const sources = useMemo(() => {
     return SHAPE_SOURCES.map((source) => {
-      const cloud = sampleSvgPointCloud(source.svg, particleCount, {
-        targetSize: source.id === 'seal' ? 2.0 : 2.25,
-        contourRatio:
-          source.id === 'stroke' ? 0.52 : source.id === 'cloud' ? 0.28 : 0.36,
+      const sampled = sampleSvgPointCloud(source.svg, source.sampleCount, {
+        targetSize: source.targetSize,
+        contourRatio: source.contourRatio,
       })
+      const cloud = expandPointCloud(sampled, particleCount)
 
       return {
         ...source,
@@ -95,7 +113,7 @@ function useShapeSource(particleCount) {
       transitionTokenRef.current += 1
     }
 
-    const timer = window.setInterval(cycle, SHAPE_CYCLE_INTERVAL)
+    const timer = window.setInterval(cycle, DISPLAY_DURATION)
 
     return () => {
       window.clearInterval(timer)
@@ -112,7 +130,7 @@ function useShapeSource(particleCount) {
     let raf = 0
 
     const animate = (now) => {
-      const raw = (now - start) / SHAPE_MORPH_DURATION
+      const raw = (now - start) / TRANSITION_DURATION
       const eased = smoothStep(raw)
       setTransitionProgress(eased)
 

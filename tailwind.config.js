@@ -12,7 +12,7 @@ export default {
         gold: '#c9b184',
       },
       fontFamily: {
-        sans: ['"Noto Serif SC"', '"Source Han Serif SC"', '"PingFang SC"', 'serif'],
+        serif: ['"Noto Serif SC"', '"Source Han Serif SC"', '"PingFang SC"', 'serif'],
       },
       letterSpacing: {
         calm: '0.18em',

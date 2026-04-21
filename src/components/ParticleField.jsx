@@ -5,23 +5,31 @@ import useShapeSource from '../hooks/useShapeSource'
 import useParticleSimulation from '../hooks/useParticleSimulation'
 import { createParticlePalette, createParticleShape } from '../utils/particle'
 
-const PARTICLE_COUNT = 14000
+const MAX_PARTICLES = 8000
+const MOBILE_PARTICLES = 4000
+const DESKTOP_PARTICLES = 7200
 
 function ParticleField({ interactionRef, interactionState }) {
   const pointsRef = useRef(null)
   const materialRef = useRef(null)
   const { gl } = useThree()
-  const shapeSource = useShapeSource(PARTICLE_COUNT)
+  const particleCount = useMemo(() => {
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1280
+    const target = width < 768 ? MOBILE_PARTICLES : DESKTOP_PARTICLES
+    return Math.min(target, MAX_PARTICLES)
+  }, [])
 
-  const fallbackShape = useMemo(() => createParticleShape(PARTICLE_COUNT), [])
+  const shapeSource = useShapeSource(particleCount)
+
+  const fallbackShape = useMemo(() => createParticleShape(particleCount), [particleCount])
   const colors = useMemo(
-    () => createParticlePalette(PARTICLE_COUNT, shapeSource.targetLayers),
-    [shapeSource.targetLayers],
+    () => createParticlePalette(particleCount, shapeSource.targetLayers),
+    [particleCount, shapeSource.targetLayers],
   )
   const simulation = useParticleSimulation({
-    count: PARTICLE_COUNT,
+    count: particleCount,
     targetPositions: shapeSource.targetPositions ?? fallbackShape.positions,
-    targetLayers: shapeSource.targetLayers ?? fallbackShape.layers ?? new Float32Array(PARTICLE_COUNT),
+    targetLayers: shapeSource.targetLayers ?? fallbackShape.layers ?? new Float32Array(particleCount),
     targetSeeds: shapeSource.targetSeeds ?? fallbackShape.seeds,
     morphProgress: shapeSource.transitionProgress,
   })
@@ -107,7 +115,7 @@ function ParticleField({ interactionRef, interactionState }) {
               vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
               vDepth = clamp(1.2 - (-mvPosition.z * 0.12), 0.25, 1.0);
               float breathe = 0.96 + sin(uTime * 0.18 + aSeed * 6.2831) * 0.035;
-              gl_PointSize = mix(1.7, 4.0, aLayer) * (0.84 + aSeed * 0.42) * uPixelRatio * vDepth * breathe * mix(0.96, 1.05, uMorph);
+              gl_PointSize = mix(1.2, 2.9, aLayer) * (0.84 + aSeed * 0.42) * uPixelRatio * vDepth * breathe * mix(0.96, 1.02, uMorph);
               gl_Position = projectionMatrix * mvPosition;
             }
           `}
@@ -124,7 +132,7 @@ function ParticleField({ interactionRef, interactionState }) {
               float dist = length(centered);
               float alpha = smoothstep(0.5, 0.05, dist);
               alpha *= smoothstep(0.18, 1.0, vDepth);
-              alpha *= mix(0.28, 0.78, vLayer);
+              alpha *= mix(0.24, 0.7, vLayer);
               alpha *= 0.86 + vSeed * 0.16;
               alpha *= 0.94 + sin(uTime * 0.24 + vSeed * 12.0) * 0.025;
               alpha *= mix(1.0, 0.92, uMorph);
